@@ -6,9 +6,32 @@
             <div class="date">
                 {{ post.published_date }}
             </div>
+
         {% endif %}
         <a class="btn btn-default" href="{% url 'post_edit' pk=post.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
         <h1>{{ post.title }}</h1>
+
+        <style>
+            img { max-width: 100%; }
+        </style>
+        {% if post.photo %}
+            <img src="{{ post.photo.url }}" />
+        {% endif %}
+
+
         <p>{{ post.text|linebreaksbr }}</p>
+        <h3>댓글</h3>
+
+        <a href="{% url 'blog.views.comment_new' pk=post.pk %}">write comment</a>
+
+        <ul>
+            {% for comment in post.comment_set.all %}
+                <li>
+                    {{ comment.message }}
+                    <small>by {{ comment.author }}, {{ comment.created_At }}</small>
+                    <a href="{% url 'blog.views.comment_edit' post.pk comment.pk %}">edit</a>
+                </li>
+            {% endfor %}
+        </ul>
     </div>
 {% endblock %}

@@ -1,8 +1,8 @@
 from django.shortcuts import redirect
 from django.utils import timezone
-from .models import Post
+from .models import Post, Comment
 from django.shortcuts import render, get_object_or_404
-from .forms import PostForm
+from .forms import PostForm, CommentForm
 
 def post_list(request):
     posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('published_date') 
@@ -34,6 +34,36 @@ def post_edit(request, pk):
             return redirect('blog.views.post_detail', pk=post.pk)
     else:
         form = PostForm(instance=post)
-    return render(request, 'blog/post_edit.html', {'form': form})
+        return render(request, 'blog/post_edit.html', {'form': form})
 
-# Create your views here.
+def comment_new(request, pk):
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = Post.objects.get(pk=pk)
+            comment.save()
+            return redirect('blog.views.post_detail', pk=pk)
+    else:
+        form = CommentForm()
+        return render(request, 'blog/post_form.html', {'form': form})
+
+
+
+
+def comment_edit(request, post_pk, pk):
+    comment = Comment.objects.get(pk=pk)
+
+    if request.method == "POST":
+        form = CommentForm(request.POST, instance=comment)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = Post.objects.get(pk=post_pk)
+            comment.save()
+            return redirect('blog.views.post_detail', pk=post_pk)
+    else:
+        form = CommentForm(instance=comment)
+        return render(request, 'blog/post_form.html', {'form': form})
+
+
+
